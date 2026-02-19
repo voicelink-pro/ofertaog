@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoiceLink — Asystent Głosowy AI dla Placówek Medycznych</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --gradient-start: #00D9FF;
+            --gradient-mid: #7B2CBF;
+            --gradient-end: #9D4EDD;
+            --text-dark: #1A1A1A;
+            --text-gray: #6B7280;
+            --accent-red: #DC3545;
+            --accent-green: #2E7D32;
+        }
+
+        @page { size: A4; margin: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--text-dark);
+            background: #f0f0f5;
+            margin: 0;
+        }
+
+        .page {
+            width: 210mm;
+            height: 297mm;
+            margin: 0 auto;
+            padding: 12mm 15mm 10mm;
+            background: #fff;
+            box-shadow: 0 0 30px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-mid), var(--gradient-end));
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-mid) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eee;
+            margin-bottom: 10px;
+        }
+
+        .header-logo { height: 58px; width: auto; }
+
+        .header-right { text-align: right; }
+
+        .header-title {
+            font-size: 15pt;
+            font-weight: 800;
+            color: var(--text-dark);
+            line-height: 1.2;
+        }
+
+        .header-subtitle {
+            font-size: 8.5pt;
+            color: var(--text-gray);
+            margin-top: 2px;
+        }
+
+        /* Hero block */
+        .hero {
+            text-align: center;
+            padding: 10px 16px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(0,217,255,0.06) 0%, rgba(123,44,191,0.1) 100%);
+            border: 1px solid rgba(0,217,255,0.2);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-mid), var(--gradient-end));
+        }
+
+        .hero h1 {
+            font-size: 14pt;
+            font-weight: 800;
+            margin-bottom: 3px;
+            line-height: 1.2;
+        }
+
+        .hero .tagline {
+            font-size: 8.5pt;
+            color: var(--text-gray);
+            line-height: 1.45;
+            max-width: 520px;
+            margin: 0 auto;
+        }
+
+        /* Section titles */
+        .section-title {
+            font-size: 9.5pt;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+            padding-bottom: 4px;
+            border-bottom: 2px solid transparent;
+            border-image: linear-gradient(90deg, var(--gradient-start), var(--gradient-mid)) 1;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .section-title .icon {
+            width: 20px;
+            height: 20px;
+            min-width: 20px;
+            border-radius: 5px;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-mid));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .section-title .icon svg {
+            width: 12px;
+            height: 12px;
+            fill: #fff;
+        }
+
+        /* Main content fills remaining space */
+        .content { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+
+        /* Two columns */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* Problem cards */
+        .problems-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .problem-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            padding: 6px 8px;
+            border-radius: 7px;
+            background: linear-gradient(135deg, rgba(220,53,69,0.04) 0%, rgba(255,107,107,0.08) 100%);
+            border: 1px solid rgba(220,53,69,0.15);
+        }
+
+        .problem-item .p-icon {
+            width: 18px;
+            height: 18px;
+            min-width: 18px;
+            border-radius: 4px;
+            background: linear-gradient(135deg, #FFF5F5, #FED7D7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1px;
+        }
+
+        .problem-item .p-icon svg {
+            width: 10px;
+            height: 10px;
+            fill: var(--accent-red);
+        }
+
+        .problem-item .p-text {
+            font-size: 7.5pt;
+            color: var(--text-dark);
+            font-weight: 600;
+            line-height: 1.35;
+        }
+
+        /* Feature cards */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 7px;
+        }
+
+        .feature-item {
+            padding: 8px 8px;
+            border-radius: 9px;
+            background: linear-gradient(135deg, rgba(0,217,255,0.05) 0%, rgba(123,44,191,0.07) 100%);
+            border: 1px solid rgba(0,217,255,0.18);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-item::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--gradient-start), var(--gradient-mid));
+        }
+
+        .feature-item .f-icon {
+            width: 24px;
+            height: 24px;
+            margin: 0 auto 4px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-mid));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .feature-item .f-icon svg {
+            width: 13px;
+            height: 13px;
+            fill: #fff;
+        }
+
+        .feature-item .f-title {
+            font-size: 7.5pt;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-mid));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 2px;
+        }
+
+        .feature-item .f-desc {
+            font-size: 7pt;
+            color: var(--text-gray);
+            line-height: 1.35;
+        }
+
+        /* Savings strip */
+        .savings-strip {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 7px;
+        }
+
+        .saving-card {
+            text-align: center;
+            padding: 8px 6px;
+            border-radius: 9px;
+            background: white;
+            border: 1px solid rgba(0,217,255,0.2);
+            box-shadow: 0 2px 8px rgba(0,217,255,0.06);
+        }
+
+        .saving-card .s-value {
+            font-size: 15pt;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-mid) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+            margin-bottom: 2px;
+        }
+
+        .saving-card .s-label {
+            font-size: 7pt;
+            color: var(--text-gray);
+            line-height: 1.3;
+            font-weight: 500;
+        }
+
+        .saving-card.green .s-value {
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Description text */
+        .desc-text {
+            font-size: 8.5pt;
+            color: var(--text-dark);
+            line-height: 1.5;
+            margin-bottom: 6px;
+        }
+
+        .desc-text strong {
+            color: var(--gradient-mid);
+        }
+
+        /* Why VoiceLink block */
+        .why-block {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .why-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 7px 10px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, rgba(0,217,255,0.04) 0%, rgba(123,44,191,0.06) 100%);
+            border: 1px solid rgba(0,217,255,0.15);
+        }
+
+        .why-card .w-icon {
+            width: 22px;
+            height: 22px;
+            min-width: 22px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1px;
+        }
+
+        .why-card .w-icon svg {
+            width: 13px;
+            height: 13px;
+        }
+
+        .why-card .w-title {
+            font-size: 7.5pt;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 1px;
+        }
+
+        .why-card .w-desc {
+            font-size: 7pt;
+            color: var(--text-gray);
+            line-height: 1.35;
+        }
+
+        /* CTA box */
+        .cta-box {
+            padding: 10px 16px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-mid));
+            text-align: center;
+        }
+
+        .cta-box p {
+            font-size: 9pt;
+            font-weight: 700;
+            color: white;
+            line-height: 1.3;
+        }
+
+        .cta-box .cta-small {
+            font-size: 7.5pt;
+            font-weight: 500;
+            opacity: 0.9;
+            margin-top: 1px;
+        }
+
+        /* Footer */
+        .footer {
+            padding-top: 8px;
+            border-top: 2px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .footer-left {
+            font-size: 7.5pt;
+            color: var(--text-gray);
+        }
+
+        .footer-left a {
+            color: var(--gradient-mid);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .footer-contact {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .footer-contact .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 7.5pt;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .footer-contact .contact-item svg {
+            width: 11px;
+            height: 11px;
+            fill: var(--gradient-mid);
+        }
+
+        @media print {
+            body { background: #fff; }
+            .page { box-shadow: none; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page">
+
+        <!-- Header -->
+        <header class="header">
+            <img src="logo.png" alt="VoiceLink" class="header-logo">
+            <div class="header-right">
+                <div class="header-title">Poznaj <span class="gradient-text">VoiceLink</span></div>
+                <div class="header-subtitle">Asystent głosowy AI dla placówek medycznych</div>
+            </div>
+        </header>
+
+        <!-- Main content -->
+        <div class="content">
+
+            <!-- Opis + Problemy -->
+            <div class="two-col">
+                <div>
+                    <div class="section-title">
+                        <div class="icon"><svg viewBox="0 0 24 24"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/></svg></div>
+                        Czym jest VoiceLink?
+                    </div>
+                    <p class="desc-text">
+                        <strong>VoiceLink</strong> to asystent głosowy oparty na sztucznej inteligencji, stworzony specjalnie dla placówek medycznych. Prowadzi naturalne rozmowy telefoniczne z pacjentami — odbiera połączenia, udziela informacji, rejestruje wizyty i wysyła potwierdzenia SMS. Działa jak doświadczony recepcjonista, ale nigdy nie choruje, nie bierze urlopów i jest dostępny o każdej porze.
+                    </p>
+                    <p class="desc-text" style="margin-bottom: 0;">
+                        Wdrożenie trwa około 2 tygodni, bez zmian w infrastrukturze. Asystent integruje się z systemem medycznym przychodni i od pierwszego dnia przejmuje obsługę połączeń przychodzących.
+                    </p>
+                </div>
+                <div>
+                    <div class="section-title">
+                        <div class="icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div>
+                        Jakie problemy rozwiązuje?
+                    </div>
+                    <div class="problems-grid">
+                        <div class="problem-item">
+                            <div class="p-icon"><svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></div>
+                            <div class="p-text">44% nieodebranych telefonów w przychodniach</div>
+                        </div>
+                        <div class="problem-item">
+                            <div class="p-icon"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg></div>
+                            <div class="p-text">Kolejki i długi czas oczekiwania na linii</div>
+                        </div>
+                        <div class="problem-item">
+                            <div class="p-icon"><svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></div>
+                            <div class="p-text">Recepcja zajęta telefonem zamiast pacjentami</div>
+                        </div>
+                        <div class="problem-item">
+                            <div class="p-icon"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm-1-6h2v2h-2zm2.07-7.75l-.9.92C11.45 7.89 11 8.5 11 10h2v-.5l1.46-1.46c.21-.22.34-.52.34-.85 0-.83-.67-1.5-1.5-1.5s-1.5.68-1.5 1.51h-2c0-1.94 1.57-3.5 3.5-3.5s3.5 1.57 3.5 3.5c0 .58-.18 1.12-.5 1.58l-.73.72z"/></svg></div>
+                            <div class="p-text">Frustracja pacjentów i negatywne opinie</div>
+                        </div>
+                        <div class="problem-item" style="grid-column: 1 / -1;">
+                            <div class="p-icon"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 10h2v7H7zm4-3h2v10h-2zm4 6h2v4h-2z"/></svg></div>
+                            <div class="p-text">Utracone przychody — każde nieodebrane połączenie to potencjalnie stracona wizyta</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kluczowe funkcje -->
+            <div>
+                <div class="section-title">
+                    <div class="icon"><svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg></div>
+                    Kluczowe funkcje asystenta
+                </div>
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <div class="f-icon"><svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></div>
+                        <div class="f-title">Odbieranie telefonów</div>
+                        <div class="f-desc">100% połączeń odebranych natychmiast, bez kolejek</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="f-icon"><svg viewBox="0 0 24 24"><path d="M19 4H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zM7 11h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zM7 15h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/></svg></div>
+                        <div class="f-title">Rejestracja wizyt</div>
+                        <div class="f-desc">Rezerwuje, odwołuje i zmienia terminy w kalendarzu</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="f-icon"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg></div>
+                        <div class="f-title">Udzielanie informacji</div>
+                        <div class="f-desc">Godziny, usługi, dojazd, przygotowanie do wizyty</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="f-icon"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12zM17 11h-4V7h-2v4H7v2h4v4h2v-4h4z"/></svg></div>
+                        <div class="f-title">Potwierdzenia SMS</div>
+                        <div class="f-desc">Automatyczny SMS z datą, godziną i adresem</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="f-icon"><svg viewBox="0 0 24 24"><path d="M18 11l5-5-5-5v3h-4v4h4v3zm2 4.5c-1.25 0-2.45-.2-3.57-.57-.35-.11-.74-.03-1.02.24l-2.2 2.2c-2.83-1.44-5.15-3.75-6.59-6.59l2.2-2.21c.28-.26.36-.65.25-1C8.7 6.45 8.5 5.25 8.5 4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5c0-.55-.45-1-1-1z"/></svg></div>
+                        <div class="f-title">Przekierowanie rozmów</div>
+                        <div class="f-desc">Płynne przekierowanie do pracownika w razie potrzeby</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="f-icon"><svg viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12zm-6-1h2V9h-2v6zm-4 0h2v-4h-2v4zm8 0h2V7h-2v8z"/></svg></div>
+                        <div class="f-title">Kilkanaście rozmów naraz</div>
+                        <div class="f-desc">Obsługuje wielu pacjentów jednocześnie, bez czekania</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Oszczędności -->
+            <div>
+                <div class="section-title">
+                    <div class="icon"><svg viewBox="0 0 24 24"><path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/></svg></div>
+                    Oszczędności i korzyści
+                </div>
+                <div class="savings-strip">
+                    <div class="saving-card">
+                        <div class="s-value">24/7</div>
+                        <div class="s-label">Dostępność<br>przez cały rok</div>
+                    </div>
+                    <div class="saving-card">
+                        <div class="s-value">~40h</div>
+                        <div class="s-label">Zaoszczędzonego czasu<br>recepcji miesięcznie</div>
+                    </div>
+                    <div class="saving-card green">
+                        <div class="s-value">60%</div>
+                        <div class="s-label">Niższy koszt niż<br>etat recepcjonisty</div>
+                    </div>
+                    <div class="saving-card">
+                        <div class="s-value">100%</div>
+                        <div class="s-label">Odebranych<br>połączeń</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dlaczego VoiceLink -->
+            <div>
+                <div class="section-title">
+                    <div class="icon"><svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg></div>
+                    Dlaczego VoiceLink?
+                </div>
+                <div class="why-block">
+                    <div class="why-card">
+                        <div class="w-icon" style="background: linear-gradient(135deg, rgba(0,217,255,0.15), rgba(123,44,191,0.2));"><svg viewBox="0 0 24 24" fill="none"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" fill="#7B2CBF"/></svg></div>
+                        <div>
+                            <div class="w-title">Specjalizacja medyczna</div>
+                            <div class="w-desc">Tworzymy asystentów wyłącznie dla placówek medycznych — znamy specyfikę branży</div>
+                        </div>
+                    </div>
+                    <div class="why-card">
+                        <div class="w-icon" style="background: linear-gradient(135deg, rgba(76,175,80,0.15), rgba(46,125,50,0.2));"><svg viewBox="0 0 24 24" fill="none"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z" fill="#2E7D32"/></svg></div>
+                        <div>
+                            <div class="w-title">RODO i OSOZ API</div>
+                            <div class="w-desc">Zgodność z RODO, certyfikowany partner OSOZ — dane pacjentów są bezpieczne</div>
+                        </div>
+                    </div>
+                    <div class="why-card">
+                        <div class="w-icon" style="background: linear-gradient(135deg, rgba(255,152,0,0.15), rgba(255,152,0,0.25));"><svg viewBox="0 0 24 24" fill="none"><path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0014.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z" fill="#FF9800"/></svg></div>
+                        <div>
+                            <div class="w-title">Wdrożenie w ~2 tygodnie</div>
+                            <div class="w-desc">Ok. 2 tygodnie wdrożenia, bez zmian w infrastrukturze placówki</div>
+                        </div>
+                    </div>
+                    <div class="why-card">
+                        <div class="w-icon" style="background: linear-gradient(135deg, rgba(220,53,69,0.12), rgba(220,53,69,0.2));"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.94s4.18 1.36 4.18 3.85c-.01 1.83-1.38 2.83-3.12 3.19z" fill="#DC3545"/></svg></div>
+                        <div>
+                            <div class="w-title">Bez długich umów</div>
+                            <div class="w-desc">Miesięczny okres wypowiedzenia — pełna swoboda i elastyczność</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA -->
+            <div class="cta-box">
+                <p>Umów się na bezpłatne demo i przekonaj się, jak VoiceLink odmieni obsługę telefoniczną w Twojej placówce</p>
+                <p class="cta-small">Prezentacja trwa ok. 20 minut — bez zobowiązań</p>
+            </div>
+
+            <!-- Kontakt pod CTA -->
+            <div style="display: flex; align-items: center; justify-content: center; gap: 20px; padding: 6px 0; margin-top: 2px;">
+                <div style="display: flex; align-items: center; gap: 5px; font-size: 8.5pt; font-weight: 700; color: var(--text-dark);">
+                    <svg viewBox="0 0 24 24" style="width: 13px; height: 13px; fill: var(--gradient-mid);"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                    jan.zielinski@voicelink.pl
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px; font-size: 8.5pt; font-weight: 700; color: var(--text-dark);">
+                    <svg viewBox="0 0 24 24" style="width: 13px; height: 13px; fill: var(--gradient-mid);"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                    735 025 087
+                </div>
+                <div style="font-size: 8.5pt; color: var(--text-gray); font-weight: 600;">
+                    Jan Zieliński — Dyrektor Sprzedaży
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-left">
+                &copy; 2026 VoiceLink &mdash; <a href="https://voicelink.pl">voicelink.pl</a>
+            </div>
+            <div class="footer-contact">
+                <div class="contact-item">
+                    <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                    +48 123 456 789
+                </div>
+                <div class="contact-item">
+                    <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                    kontakt@voicelink.pl
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>
